@@ -2,3 +2,4 @@ venv/
 .env
 creds.json
 flowwow.ipynb
+.DS_Store
