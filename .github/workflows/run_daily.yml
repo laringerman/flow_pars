@@ -1,0 +1,20 @@
+name: Daily pars bot
+
+on: 
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+env:
+  GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+jobs:
+  Daily-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+      - name: Run App
+        run: python app.py
