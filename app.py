@@ -143,7 +143,7 @@ def load_new_data(new_df, sheet_name):
 if __name__ == '__main__':
     #get data and load it to the specific sheet
     for sh_name, search_name in zip(worksheets_name,  search_list):
-    search_df = get_data(search_name)
-    load_new_data(search_df, sh_name)
-    #whait for 1 sec just in case
-    time.sleep(1)
+        search_df = get_data(search_name)
+        load_new_data(search_df, sh_name)
+        #whait for 1 sec just in case
+        time.sleep(1)
