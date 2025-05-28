@@ -1,5 +1,5 @@
 venv/
 .env
 creds.json
-.ipynb
+*.ipynb
 .DS_Store
