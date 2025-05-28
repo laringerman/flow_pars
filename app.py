@@ -53,18 +53,10 @@ def clean_delivery_time(text):
     text = re.sub(r'(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})', r'\1-\2', text)
     return text
 
-def get_data(search_name):
-    """
-    function for get data from the flowwow use their hidden API and turn it to dataframe
-    
-    Args:
-        search_name: the search query we will search for
-        
-    Returns:
-        new_df: dataframe with data
-    """
+def get_page(search_name, page=1):
     # Base URL
-    url = "https://clientweb.flowwow.com/apiuser/products/search/"
+    url = "https://clientweb.flowwow.com/apiuser/products/search/"    
+
 
     # Headers
     headers = {
@@ -77,42 +69,47 @@ def get_data(search_name):
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
 
+
     # Parameters
     params = {
-        "property": json.dumps({
-            "range_group_ids": [],
-            #search query
-            "query": search_name,
-            #city id - 1 is Moscow
-            "city": 1,
-            #adress coordinates
-            "lat": 55.783514,
-            "lng": 37.720232
-        }),
-        "limit": 60,
-        "filters": "{}",
-        "currency": "RUB",
-        "lang": "ru",
-        "page": 1
-    }
+            "property": json.dumps({
+                "range_group_ids": [],
+                #search query
+                "query": search_name,
+                #city id - 1 is Moscow
+                "city": 1,
+                #adress coordinates
+                "lat": 55.783514,
+                "lng": 37.720232
+            }),
+            "limit": 60,
+            "filters": "{}",
+            "currency": "RUB",
+            "lang": "ru",
+            "page": page
+        }
 
     try:
-        # Make the GET request
-        response = requests.get(url, params=params, headers=headers)
-        
-        # Check if the request was successful
-        if response.status_code == 200:
-            # pass
-            pass
-        else:
-            print(f"Request failed with status code {response.status_code}")
-            print(response.text)
+            # Make the GET request
+            response = requests.get(url, params=params, headers=headers)
+            
+            # Check if the request was successful
+            if response.status_code == 200:
+                # pass
+                pass
+            else:
+                print(f"Request failed with status code {response.status_code}")
+                print(response.text)
 
     except requests.exceptions.RequestException as e:
-        print(f"An error occurred: {e}")
+            print(f"An error occurred: {e}")
 
     #make text as json
     j = response.json()
+    return j
+        
+def get_df(j):
+    
     #normalize json's data part
     df = pd.json_normalize(j['data']['items'])
     #create dataframe
@@ -125,6 +122,32 @@ def get_data(search_name):
     new_df = new_df.fillna('')
     #add creation time
     new_df['timestamp'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+    return new_df
+
+def get_data(search_name):
+    """
+    function for get data from the flowwow use their hidden API and turn it to dataframe
+    
+    Args:
+        search_name: the search query we will search for
+        
+    Returns:
+        new_df: dataframe with data
+    """
+
+    j = get_page(search_name)
+
+    #get pages count
+    pages = int(j['data']['total'] / 60)
+    
+    new_df = get_df(j)
+
+    for page in range(2, pages+1):
+        j = get_page(search_name, page)
+        new_df_for_pages = get_df(j)
+        new_df = pd.concat([new_df, new_df_for_pages])
+        #whait for 1 sec just in case
+        time.sleep(1)
     return new_df
 
 def load_new_data(new_df, sheet_name):
@@ -145,5 +168,4 @@ if __name__ == '__main__':
     for sh_name, search_name in zip(worksheets_name,  search_list):
         search_df = get_data(search_name)
         load_new_data(search_df, sh_name)
-        #whait for 1 sec just in case
-        time.sleep(1)
+
