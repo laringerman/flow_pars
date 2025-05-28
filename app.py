@@ -138,7 +138,11 @@ def get_data(search_name):
     j = get_page(search_name)
 
     #get pages count
-    pages = int(j['data']['total'] / 60)
+    pages_div = j['data']['total'] % 60
+    if pages_div == 0:
+        pages = int(j['data']['total'] / 60)
+    else: 
+        pages = int(j['data']['total'] / 60) + 1 
     
     new_df = get_df(j)
 
