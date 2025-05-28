@@ -146,6 +146,7 @@ def get_data(search_name):
         j = get_page(search_name, page)
         new_df_for_pages = get_df(j)
         new_df = pd.concat([new_df, new_df_for_pages])
+        new_df = new_df.fillna('')
         #whait for 1 sec just in case
         time.sleep(1)
     return new_df
