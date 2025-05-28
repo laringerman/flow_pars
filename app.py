@@ -54,6 +54,17 @@ def clean_delivery_time(text):
     return text
 
 def get_page(search_name, page=1):
+    """
+    function for get data from the one page flowwow use their hidden API and turn it to dataframe
+    
+    Args:
+        search_name: str, the search query we will search for
+        page: int, number of page you whant to get
+
+        
+    Returns:
+        j: json file with data
+    """
     # Base URL
     url = "https://clientweb.flowwow.com/apiuser/products/search/"    
 
@@ -86,6 +97,7 @@ def get_page(search_name, page=1):
             "filters": "{}",
             "currency": "RUB",
             "lang": "ru",
+            #page number
             "page": page
         }
 
@@ -109,7 +121,15 @@ def get_page(search_name, page=1):
     return j
         
 def get_df(j):
+    """
+    function for json to clean dataframe
     
+    Args:
+        j: json with data
+        
+    Returns:
+        new_df: dataframe with data
+    """
     #normalize json's data part
     df = pd.json_normalize(j['data']['items'])
     #create dataframe
@@ -137,22 +157,29 @@ def get_data(search_name):
 
     j = get_page(search_name)
 
-    #get pages count
-    pages_div = j['data']['total'] % 60
-    if pages_div == 0:
-        pages = int(j['data']['total'] / 60)
-    else: 
-        pages = int(j['data']['total'] / 60) + 1 
-    
+    # get df with first page
     new_df = get_df(j)
 
-    for page in range(2, pages+1):
-        j = get_page(search_name, page)
-        new_df_for_pages = get_df(j)
-        new_df = pd.concat([new_df, new_df_for_pages])
-        new_df = new_df.fillna('')
-        #whait for 1 sec just in case
-        time.sleep(1)
+    if j['data']['total'] > 60:
+        #get pages count
+        pages_div = j['data']['total'] % 60
+
+        #chech how pany pages
+        if pages_div == 0:
+            pages = int(j['data']['total'] / 60)
+        else: 
+            pages = int(j['data']['total'] / 60) + 1 
+        
+        #get data for all pages
+        for page in range(2, pages+1):
+                j = get_page(search_name, page)
+                new_df_for_pages = get_df(j)
+                new_df = pd.concat([new_df, new_df_for_pages])
+                new_df = new_df.fillna('')
+                #whait for 1 sec just in case
+                time.sleep(1)
+    else:
+        pass
     return new_df
 
 def load_new_data(new_df, sheet_name):
