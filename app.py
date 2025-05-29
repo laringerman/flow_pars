@@ -187,11 +187,12 @@ def get_querys_count(search_list, name = 'semyonovskaya 7', my_coordinates = {"l
     for search_query in range(0, len(search_list)):
         try:
             p = get_page(search_list[search_query],  coordinates = my_coordinates)
+            querys = p['data']['total']
         except:
-            p = 0
+            querys = 'no data'
         data.append({
         'search_query' : search_list[search_query],
-        name : p['data']['total']
+        name : querys
         })
         time.sleep(1)    
     return data
