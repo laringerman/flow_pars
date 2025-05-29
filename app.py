@@ -182,7 +182,7 @@ def load_new_data(new_df, sheet_name):
     wks.clear()
     wks.update([new_df.columns.values.tolist()] + new_df.values.tolist())
 
-def get_querys_count(search_list, my_coordinates = {"lat": 55.783514, "lng": 37.720232}):
+def get_querys_count(search_list, name = 'semyonovskaya 7', my_coordinates = {"lat": 55.783514, "lng": 37.720232}):
     data = []
     for search_query in range(0, len(search_list)):
         try:
@@ -191,7 +191,7 @@ def get_querys_count(search_list, my_coordinates = {"lat": 55.783514, "lng": 37.
             p = 0
         data.append({
         'search_query' : search_list[search_query],
-        'no adress': p['data']['total']
+        name : p['data']['total']
         })
         time.sleep(1)    
     return data
@@ -199,7 +199,8 @@ def get_querys_count(search_list, my_coordinates = {"lat": 55.783514, "lng": 37.
 def get_querys_for_adress(list_name = 'search_list'):
     search_list = sh.worksheet(list_name).col_values(1)
     smol_data = get_querys_count(search_list)
-    no_adress_data = get_querys_count(search_list, my_coordinates = {})
+    time.sleep(60) 
+    no_adress_data = get_querys_count(search_list, name = 'no adress', my_coordinates = {})
     smol_df = pd.DataFrame(smol_data)
     no_adr_df = pd.DataFrame(no_adress_data)
     final_df = no_adr_df.merge(smol_df, left_on='search_query', right_on='search_query')
