@@ -53,18 +53,7 @@ def clean_delivery_time(text):
     text = re.sub(r'(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})', r'\1-\2', text)
     return text
 
-def get_page(search_name, page=1):
-    """
-    function for get data from the one page flowwow use their hidden API and turn it to dataframe
-    
-    Args:
-        search_name: str, the search query we will search for
-        page: int, number of page you whant to get
-
-        
-    Returns:
-        j: json file with data
-    """
+def get_page(search_name, page=1, coordinates = {"lat": 55.783514, "lng": 37.720232}):
     # Base URL
     url = "https://clientweb.flowwow.com/apiuser/products/search/"    
 
@@ -80,24 +69,22 @@ def get_page(search_name, page=1):
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
 
+    property_dump = {                
+        "range_group_ids": [],
+        #search query
+        "query": search_name,
+        #city id - 1 is Moscow
+        "city": 1     
+    }
+    property_dump.update(coordinates)
 
     # Parameters
     params = {
-            "property": json.dumps({
-                "range_group_ids": [],
-                #search query
-                "query": search_name,
-                #city id - 1 is Moscow
-                "city": 1,
-                #adress coordinates
-                "lat": 55.783514,
-                "lng": 37.720232
-            }),
+            "property": json.dumps(property_dump),
             "limit": 60,
             "filters": "{}",
             "currency": "RUB",
             "lang": "ru",
-            #page number
             "page": page
         }
 
@@ -119,6 +106,7 @@ def get_page(search_name, page=1):
     #make text as json
     j = response.json()
     return j
+        
         
 def get_df(j):
     """
@@ -194,10 +182,36 @@ def load_new_data(new_df, sheet_name):
     wks.clear()
     wks.update([new_df.columns.values.tolist()] + new_df.values.tolist())
 
+def get_querys_count(search_list, my_coordinates = {"lat": 55.783514, "lng": 37.720232}):
+    data = []
+    for search_query in range(0, len(search_list)):
+        try:
+            p = get_page(search_list[search_query],  coordinates = my_coordinates)
+        except:
+            p = 0
+        data.append({
+        'search_query' : search_list[search_query],
+        'no adress': p['data']['total']
+        })
+        time.sleep(1)    
+    return data
+
+def get_querys_for_adress(list_name = 'search_list'):
+    search_list = sh.worksheet(list_name).col_values(1)
+    smol_data = get_querys_count(search_list)
+    no_adress_data = get_querys_count(search_list, my_coordinates = {})
+    smol_df = pd.DataFrame(smol_data)
+    no_adr_df = pd.DataFrame(no_adress_data)
+    final_df = no_adr_df.merge(smol_df, left_on='search_query', right_on='search_query')
+    return final_df
+
+
 #srart of the code
 if __name__ == '__main__':
     #get data and load it to the specific sheet
     for sh_name, search_name in zip(worksheets_name,  search_list):
         search_df = get_data(search_name)
         load_new_data(search_df, sh_name)
+    querys_count_df = get_querys_for_adress()
+    load_new_data(querys_count_df, 'list_of_query')
 
