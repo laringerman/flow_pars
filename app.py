@@ -168,8 +168,8 @@ def get_data(search_name):
                 new_df_for_pages = get_df(j)
                 new_df = pd.concat([new_df, new_df_for_pages])
                 new_df = new_df.fillna('')
-                #whait for 1 sec just in case
-                time.sleep(1)
+                #whait for 0.5 sec just in case
+                time.sleep(0.5)
     else:
         pass
     return new_df
@@ -218,6 +218,6 @@ if __name__ == '__main__':
     for sh_name, search_name in zip(worksheets_name,  search_list):
         search_df = get_data(search_name)
         load_new_data(search_df, sh_name)
-    #querys_count_df = get_querys_for_adress()
-    #load_new_data(querys_count_df, 'list_of_query')
+    querys_count_df = get_querys_for_adress()
+    load_new_data(querys_count_df, 'list_of_query')
 
