@@ -106,7 +106,10 @@ def get_page(search_name, page=1, coordinates = {"lat": 55.783514, "lng": 37.720
     #make text as json
     j = response.json()
     return j
-        
+
+def create_new_link_column(df):
+    df['new_link'] = df.apply(lambda x: f"https://flowwow.com/{x['rangeGroupAlias']}/{x['link']}/", axis=1)
+    return df
         
 def get_df(j):
     """
@@ -130,6 +133,7 @@ def get_df(j):
     new_df = new_df.fillna('')
     #add creation time
     new_df['timestamp'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+    new_df = create_new_link_column(new_df)
     return new_df
 
 def get_data(search_name):
@@ -214,6 +218,6 @@ if __name__ == '__main__':
     for sh_name, search_name in zip(worksheets_name,  search_list):
         search_df = get_data(search_name)
         load_new_data(search_df, sh_name)
-    querys_count_df = get_querys_for_adress()
-    load_new_data(querys_count_df, 'list_of_query')
+    #querys_count_df = get_querys_for_adress()
+    #load_new_data(querys_count_df, 'list_of_query')
 
