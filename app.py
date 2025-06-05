@@ -211,6 +211,12 @@ def get_querys_for_adress(list_name = 'search_list'):
     final_df = no_adr_df.merge(smol_df, left_on='search_query', right_on='search_query')
     return final_df
 
+def load_datetime_pars():
+    wks = sh.worksheet('pars_date')
+    df = pd.DataFrame(wks.get_all_records())
+    df.loc[len(df)] = [datetime.now().strftime('%Y-%m-%d %H:%M')]
+    load_new_data(df, 'pars_date')
+
 
 #srart of the code
 if __name__ == '__main__':
@@ -220,4 +226,5 @@ if __name__ == '__main__':
         load_new_data(search_df, sh_name)
     querys_count_df = get_querys_for_adress()
     load_new_data(querys_count_df, 'list_of_query')
+    load_datetime_pars()
 
