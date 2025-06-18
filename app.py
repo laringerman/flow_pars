@@ -126,7 +126,7 @@ def get_df(j):
     #create dataframe
     new_df = pd.DataFrame(df)
     #clear text in delivery time
-    new_df['deliveryTime'] = new_df['deliveryTime'].apply(clean_delivery_time)
+    #new_df['deliveryTime'] = new_df['deliveryTime'].apply(clean_delivery_time)
     #drop unused columns
     new_df = new_df.drop(columns=['scoreKm', 'scorePoints'])
     #fill empty cells with empty text
