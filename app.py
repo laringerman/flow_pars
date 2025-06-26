@@ -1,5 +1,6 @@
 import pandas as pd 
 import requests
+from fake_useragent import UserAgent
 import json
 import os
 from dotenv import load_dotenv
@@ -57,17 +58,17 @@ def get_page(search_name, page=1, coordinates = {"lat": 55.783514, "lng": 37.720
     # Base URL
     url = "https://clientweb.flowwow.com/apiuser/products/search/"    
 
-
-    # Headers
+    #make header with random user agent
+    ua = UserAgent().random
     headers = {
-        "authority": "clientweb.flowwow.com",
-        "accept": "application/json",
-        "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
-        "cache-control": "no-cache",
-        "canonical-url": "https://clientweb.flowwow.com",
-        "referer": "https://clientweb.flowwow.com/",
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    }
+            "authority": "clientweb.flowwow.com",
+            "accept": "application/json",
+            "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+            "cache-control": "no-cache",
+            "canonical-url": "https://clientweb.flowwow.com",
+            "referer": "https://clientweb.flowwow.com/",
+            "user-agent": ua
+        }
 
     property_dump = {                
         "range_group_ids": [],
